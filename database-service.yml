@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vdt-db-client
+  namespace: vdt-final
+spec:
+  selector:
+    app: vdt-db
+  ports:
+    - port: 27017
+      targetPort: 27017
+  type: ClusterIP

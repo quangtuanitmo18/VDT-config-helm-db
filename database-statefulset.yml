@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vdt-db
+  namespace: vdt-final
+spec:
+  serviceName: "vdt-db"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vdt-db
+  template:
+    metadata:
+      labels:
+        app: vdt-db
+    spec:
+      containers:
+        - name: vdt-db
+          image: mongo:4.4
+          ports:
+            - containerPort: 27017
+          envFrom:
+            - secretRef:
+                name: vdt-db-env
+          volumeMounts:
+            - name: vdt-db-storage
+              mountPath: /data/db
+            - name: vdt-db-config
+              mountPath: /etc/mongo/mongod.conf
+              subPath: mongod.conf
+          command: ["mongod", "--config", "/etc/mongo/mongod.conf"]
+      volumes:
+        - name: vdt-db-config
+          configMap:
+            name: vdt-db-config
+
+  volumeClaimTemplates:
+    - metadata:
+        name: vdt-db-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: vdt-nfs-retain
